@@ -15,9 +15,9 @@
  * @wordpress-plugin
  * Plugin Name:       AMSA Voting
  * Plugin URI:        https://amsa.org.au
- * Description:       To faciliate voting process of National Councils at AMSA
+ * Description:       This is a description of the plugin.
  * Version:           1.0.0
- * Author:            Steven Zhang & Harrison Liu
+ * Author:            Steven Zhang
  * Author URI:        https://amsa.org.au/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
