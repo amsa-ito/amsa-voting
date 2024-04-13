@@ -1,0 +1,31 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+ .loading-spinner {
+    position: relative;
+      width: 24px;
+      height: 24px;
+      margin: 0 auto;
+      margin-top: 15px;
+  }
+  
+  .loading-spinner::before {
+      content: '';
+      box-sizing: border-box;
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #ccc;
+      border-radius: 50%;
+      border-top-color: rgba(0, 0, 0, 0.3);
+      animation: spin 1s linear infinite;
+      left: 0;
+      top: 0;
+  }
+  
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }

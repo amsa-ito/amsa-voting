@@ -1,0 +1,327 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+ .amsa-voting-proxy-table-wrapper {
+    max-height: 50vh; /* Adjust the height as needed */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: hidden; /* Hides horizontal scroll bar */
+}
+
+.loading-spinner {
+  position: relative;
+    width: 24px;
+    height: 24px;
+    margin: 0 auto;
+    margin-top: 15px;
+}
+
+.loading-spinner::before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    border-top-color: rgba(0, 0, 0, 0.3);
+    animation: spin 1s linear infinite;
+    left: 0;
+    top: 0;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+    /* Wrapper div */
+    .amsa-voting-poll-topic-wrapper {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+  }
+
+  /* Warning message */
+  .amsa-voting-poll-warning-messasges {
+      background-color: #ffc107;
+      color: #333;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      position: relative;
+  }
+
+  .amsa-voting-poll-warning-messasges .closebtn {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
+  }
+
+  /* Poll settings */
+  .amsa-voting-poll-settings {
+      margin-bottom: 20px;
+  }
+
+  .amsa-voting-poll-settings h4 {
+      margin-top: 0;
+  }
+
+  .amsa-voting-poll-settings ul {
+      list-style: none;
+      padding-left: 0;
+  }
+
+  .amsa-voting-poll-settings ul li {
+      margin-bottom: 5px;
+  }
+
+  /* Result wrapper */
+  #amsa-voting-result-wrapper {
+      margin-bottom: 20px;
+  }
+
+  /* Result row */
+  .amsa-voting-result-row {
+      display: flex;
+      flex-wrap: wrap;
+  }
+
+  /* Result column */
+  .amsa-voting-result-col {
+      flex: 1;
+      padding: 10px;
+      box-sizing: border-box;
+  }
+
+  /* Voting form */
+  #amsa-voting-form-wrapper {
+      margin-bottom: 20px;
+  }
+
+  #amsa_voting_form p {
+      margin: 5px 0;
+  }
+
+  #amsa_voting_form input[type="radio"] {
+      margin-right: 10px;
+  }
+
+  #amsa-voting-unvoted-reps-wrapper {
+      margin-bottom: 20px;
+  }
+
+  .amsa-voting-already-voted_message {
+      margin-bottom: 20px;
+  }
+
+  .amsa-voting-already-voted_message h5 {
+      margin: 0;
+  }
+
+  .poll-status-display {
+    /* background-color: #f0f0f0; */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+/* Poll status classes */
+.poll-status-closed {
+  background-color: #d9534f; /* Red color for closed status */
+}
+
+.poll-status-open {
+  background-color: #5cb85c; /* Green color for open status */
+}
+
+.poll-status-unvoted {
+  background-color: #337ab7; /* Blue color for unvoted status */
+}
+
+    /* Nomination table wrapper */
+    #amsa-voting-proxy-nomination-list-wrapper {
+      margin-top: 20px;
+  }
+
+  /* Search input */
+  #amsa-voting-search-proxy {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+  }
+
+  /* Table wrapper */
+  .amsa-voting-proxy-table-wrapper {
+      overflow-x: auto;
+  }
+
+  /* Table */
+  #amsa-voting-proxy-table {
+      width: 100%;
+      border-collapse: collapse;
+  }
+
+  /* Table header */
+  #amsa-voting-proxy-table thead {
+      background-color: #f0f0f0;
+  }
+
+  #amsa-voting-proxy-table th {
+      padding: 10px;
+      text-align: left;
+  }
+
+  /* Table body */
+  #amsa-voting-proxy-table tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+  }
+
+  #amsa-voting-proxy-table tbody td {
+      padding: 10px;
+      border-top: 1px solid #ccc;
+  }
+
+    /* Voting card */
+    .amsa-voting-card {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+  }
+
+  .amsa-voting-card-header {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+  }
+
+  .amsa-voting-card-title {
+      margin: 0;
+  }
+
+  .amsa-voting-voted-users {
+      list-style-type: none;
+      padding: 0;
+  }
+
+  .amsa-voting-voted-users li {
+      margin-bottom: 5px;
+  }
+
+  /* Underline color for vote types */
+  .amsa-voting-card-Votes-for .amsa-voting-card-title {
+      border-bottom: 2px solid #5cb85c; /* Blue underline for "Votes for" */
+  }
+
+  .amsa-voting-card-Votes-against .amsa-voting-card-title {
+      border-bottom: 2px solid #dc3545; /* Red underline for "Votes against" */
+  }
+
+  .amsa-voting-card-Abstentions .amsa-voting-card-title {
+      border-bottom: 2px solid #ffc107; /* Yellow underline for "Abstentions" */
+  }
+
+  /* Style for the table */
+.amsa-voting-poll-topics-overview-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  /* Style for table header */
+  .amsa-voting-poll-topics-overview-table th {
+    background-color: #f2f2f2;
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Style for table data */
+  .amsa-voting-poll-topics-overview-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Style for alternating row colors */
+  .amsa-voting-poll-topics-overview-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  /* Style for closed rows */
+  .amsa-voting-poll-topics-overview-row-closed {
+    background-color: #f9f9f9;
+  }
+  
+  /* Style for outcome colors */
+  .amsa-voting-poll-topics-overview-row td:nth-child(3) strong {
+    font-weight: bold;
+  }
+  
+  .amsa-voting-poll-topics-overview-row td:nth-child(3) strong[style="color:red"] {
+    color: red;
+  }
+  
+  .amsa-voting-poll-topics-overview-row td:nth-child(3) strong[style="color:green"] {
+    color: green;
+  }
+  
+  .amsa-voting-poll-topics-overview-row td:nth-child(3) strong[style="color:blue"] {
+    color: blue;
+  }
+  
+  .amsa-voting-poll-topics-overview-row-open {
+    background-color: #eaf7ea; /* Light green background color */
+  }
+
+  /* Style for active poll topics overview */
+.amsa-voting-active-poll-topics-overview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  /* Style for active poll topics column */
+  .amsa-voting-active-poll-topics-col {
+    width: calc(50% - 10px); /* Adjust the width as needed */
+    margin-bottom: 20px;
+  }
+  
+  /* Style for active poll topics card */
+  .amsa-voting-active-poll-topics-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+  }
+  
+  /* Style for active poll topics card header */
+  .amsa-voting-active-poll-topics-card-header {
+    margin-bottom: 10px;
+  }
+  
+  /* Style for active poll topics card title */
+  .amsa-voting-active-poll-topics-card-title {
+    margin: 0;
+  }
+  
+  /* Style for active poll topics card body */
+  .amsa-voting-active-poll-topics-card-body {
+    margin-bottom: 15px;
+  }
+  
+  /* Style for active poll topics card text */
+  .amsa-voting-active-poll-topics-card-text {
+    margin: 0;
+  }
+  
+  /* Style for active poll topics button */
