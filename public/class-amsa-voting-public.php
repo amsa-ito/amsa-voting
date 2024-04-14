@@ -62,11 +62,12 @@ class Amsa_Voting_Public {
 
 
 		// add_action( 'the_content', array($this, 'display_voting_page' ));
-		add_shortcode(str_replace('-','_',$plugin_name.'_'.$post_name), array($this, 'voting_page_shortcode'));		
+		add_shortcode(str_replace('-','_',$plugin_name.'_'.$post_name), array($this, 'voting_page_shortcode'));
 		add_shortcode('poll_topics_overview_table', array($this,'poll_topics_overview_shortcode'));
 		add_shortcode('active_poll_topics_overview', array($this,'display_active_poll_topics'));
 		add_filter( 'the_content', array($this, 'voting_page_display' ));
 		add_action('amsa_voting_poll_closed', array($this, 'talley_results'));
+		add_action('amsa_voting_poll_oepn', array($this, 'unfreeze_poll'));
 		add_action('wp_ajax_process_and_store_votes', array($this, 'process_and_store_votes'));
 		add_action('wp_ajax_nopriv_process_and_store_votes', function() {
 															wp_send_json_error('You must be logged in to vote.');
@@ -103,7 +104,7 @@ class Amsa_Voting_Public {
 
         $user_has_proxy = get_user_meta($current_user_id, 'amsa_voting_proxy', true) > 0;
 		if($user_has_proxy){
-			return '<div class="amsa-voting-active-poll-topics-has-proxy">You\'ve assigned a proxy, edit your proxy if you want to vote</div>';
+			return '<div class="amsa-voting-active-poll-topics-has-proxy">You\'ve assigned a proxy, edit your proxy if you want to vote.</div>';
 		}
 
 		// Output for card format
@@ -117,7 +118,7 @@ class Amsa_Voting_Public {
 			$representatives_only = get_post_meta($post_id, '_representatives_only', true);
 
 			if(!$representatives_only || ($representatives_only && $is_user_representing_amsa_rep)){
-				
+
 				$institution_weighted = get_post_meta($post_id, '_institution_weighted', true);
 				$voting_threshold = get_post_meta($post_id, '_voting_threshold', true);
 				// Card output for each poll topic
@@ -148,10 +149,10 @@ class Amsa_Voting_Public {
 		wp_reset_postdata();
 
 		$output .= '</div>'; // Close row
-	
+
 		return $output;
-	
-	
+
+
 	}
 
 	public function poll_topics_overview_shortcode(){
@@ -188,14 +189,14 @@ class Amsa_Voting_Public {
 			}else{
 				$voting_outcome_display='<strong>There is something wrong with the code (_voting_outcome should not be anything other than 0,1,2,3)</strong>';
 			}
-			
+
 			if($poll_status==='closed' && !get_post_meta($post_id, '_institution_weighted', true)){
 				$vote_numbers = calculate_votes($post_id); // Custom meta key _voted_users
 				$vote_number_display=$vote_numbers['for']."/".$vote_numbers['against'];
 			}else{
 				$vote_number_display="hidden";
 			}
-	
+
 			// Add a row for each poll topic
 			$output .= '<tr class="amsa-voting-poll-topics-overview-row amsa-voting-poll-topics-overview-row-'.$poll_status.'">';
 			$output .= '<td>' . $post_date_time . '</td>';
@@ -209,8 +210,13 @@ class Amsa_Voting_Public {
 
 		// Close table
 		$output .= '</tbody></table></div>';
-	
+
 		return $output;
+	}
+
+	public function unfreeze_poll($post_id){
+		update_post_meta($post_id, '_final_voted_numbers', array());
+		update_post_meta($post_id, '_final_voted_users', array());
 	}
 
 	public function talley_results($post_id){
@@ -263,7 +269,7 @@ class Amsa_Voting_Public {
 		ob_start();
 		$voting_page->render();
 		return ob_get_clean();
-	
+
 	}
 
 
@@ -283,7 +289,7 @@ class Amsa_Voting_Public {
 			}
 
 			if(get_user_meta($current_user_id, 'amsa_voting_proxy', true)>0){
-				wp_send_json_error("You've assigned a proxy and hence are ineligible to vote");
+				wp_send_json_error("You've assigned a proxy and hence are ineligible to vote.");
 			}
 
 			if(!$voting_page->is_user_rep_eligible()){
@@ -291,10 +297,10 @@ class Amsa_Voting_Public {
 			}
 
 			$has_voted = $voting_page->get_single_meta('_voted_users');
-						
+
 			$has_voted[$current_user_id]=array('vote_value'=>$vote);
 			update_post_meta($post_id,'_voted_users',$has_voted);
-			
+
 			ob_start();
 			$voting_page->render_dynamic();
 			// $this->display_already_voted_message();
@@ -308,26 +314,24 @@ class Amsa_Voting_Public {
 		check_ajax_referer($this->plugin_name.'-nonce', 'nonce');
 
 		if (isset($_POST['poll_status_change'])) {
-			
+
 			$post_id = intval($_POST['post_id']);
 			$voting_page = new Amsa_Voting_Page($post_id);
 
 			if ($voting_page->is_user_council_master()) {
 				$current_status = get_post_meta($post_id, '_poll_status', true);
-				if($current_status==='closed'){
-					wp_send_json_error('This poll is closed!');
-				}
+
 				$new_status = ($current_status === 'open') ? 'closed' : 'open';
 				update_post_meta($post_id, '_poll_status', $new_status);
 				update_post_meta($post_id, '_poll_' . $new_status . '_timestamp', current_time('timestamp'));
 				do_action('amsa_voting_poll_'.$new_status, $post_id);
-				
+
 
 				ob_start();
 				$voting_page->render_dynamic();
 				$success_json = array('poll_status'=>$new_status, 'rendered_content'=> ob_get_clean());
 				wp_send_json_success($success_json);
-			
+
 			}
 		}
 		wp_die();
@@ -349,7 +353,7 @@ class Amsa_Voting_Public {
 			}
 			// current user has principals, they can't nominate another proxy (someone has already nominated them as proxy)
 			if(get_user_meta($current_user_id, 'amsa_voting_principals', true)){
-				wp_send_json_error("Someone has nominated you as their proxy, you cannot nominate another proxy");
+				wp_send_json_error("Someone has nominated you as their proxy, you cannot nominate another proxy.");
 			}
 
 			if ($proxy_user_id > 0) {
@@ -361,14 +365,14 @@ class Amsa_Voting_Public {
 				nominate_proxy($proxy_user_id, $current_user_id);
 
 				$voting_page = new Amsa_Voting_Page($post_id);
-				
+
 				// stop any existing votes from counting
 				$has_voted = $voting_page->get_single_meta( '_voted_users');
 				if(array_key_exists($current_user_id, $has_voted)){
 					unset($has_voted[$current_user_id]);
 					update_post_meta($post_id,'_voted_users',$has_voted);
 				}
-				
+
 				ob_start();
 				$voting_page->render_proxy_nomination_header();
 				$rendered_content = ob_get_clean();
@@ -379,10 +383,10 @@ class Amsa_Voting_Public {
 
 				wp_send_json_success(array('rendered_content'=>$rendered_content, 'voting_form'=>$voting_form));
 			}else{
-				wp_send_json_error('Please select a proxy to nominate');
+				wp_send_json_error('Please select a proxy to nominate.');
 			}
 		}else{
-			wp_send_json_error('Please login to nominate proxy');
+			wp_send_json_error('Please login to nominate proxy.');
 		}
 		wp_die();
 	}
@@ -408,7 +412,7 @@ class Amsa_Voting_Public {
 			wp_send_json_success(array('rendered_content'=>$rendered_content, 'voting_form'=>$voting_form));
 
 		}else{
-			wp_send_json_error('Please login to nominate proxy');
+			wp_send_json_error('Please login to nominate proxy.');
 		}
 		wp_die();
 	}
@@ -423,7 +427,7 @@ class Amsa_Voting_Public {
 			wp_send_json_success(array('rendered_content'=>ob_get_clean()));
 
 		}else{
-			wp_send_json_error('Please login to manage your proxies');
+			wp_send_json_error('Please login to manage your proxies.');
 		}
 		wp_die();
 	}

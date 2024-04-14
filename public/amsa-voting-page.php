@@ -62,7 +62,7 @@ class Amsa_Voting_Page {
         $current_user_university = get_user_meta($this->current_user_id, '_wc_memberships_profile_field_'.get_option('amsa_voting_university_slug'), true);
         if(!$current_user_university){
             return "<div class='amsa-voting-default-proxy-warning'>Please complete your profile fields in your <a href='". get_permalink( get_option('woocommerce_myaccount_page_id') )."' title=My Account>Membership Profile</a></div>";
-            
+
         }
         // default proxy_id is -1
         if ($current_proxy_id<0) {
@@ -71,23 +71,23 @@ class Amsa_Voting_Page {
                 'role' => 'amsa_rep',
                 'meta_query' => array(
                     array(
-                        'key' => '_wc_memberships_profile_field_'.get_option('amsa_voting_university_slug'), 
+                        'key' => '_wc_memberships_profile_field_'.get_option('amsa_voting_university_slug'),
                         'value' => $current_user_university, // Get current user's university meta key
                         'compare' => '='
                     )
                 )
             );
-    
+
             // Retrieve users based on the arguments
             $users = get_users($args);
-    
+
             // If users are found, set the proxy to the first user found
             if (!empty($users)) {
                 $proxy_user = $users[0];
                 nominate_proxy($proxy_user->ID, $this->current_user_id);
-                return "<div class='amsa-voting-default-proxy-warning'>By default AMSA Member's vote goes to your AMSA Rep, but you can retract your proxy </div>";
+                return "<div class='amsa-voting-default-proxy-warning'><p>By default AMSA Member's vote goes to your AMSA Rep, but you can retract your proxy.</p></div>";
             }else{
-                return "<div class='amsa-voting-default-proxy-warning'>By default AMSA Member's vote goes to your AMSA Rep, but your AMSA Rep couldn't be found for your university</div>";
+                return "<div class='amsa-voting-default-proxy-warning'><p>By default AMSA Member's vote goes to your AMSA Rep, but your AMSA Rep couldn't be found for your university.</p></div>";
             }
         }
 
@@ -108,7 +108,7 @@ class Amsa_Voting_Page {
             $keyed_users = array_keys($retrieved_votes);
             $result[$vote_type]=array_intersect_key($keyed_users, $flipped_vote_type_keys);
         }
-       
+
         return $result;
     }
 
@@ -122,7 +122,7 @@ class Amsa_Voting_Page {
 
     public function render_proxy_nomination_header(){
         $current_proxy_id = get_user_meta($this->current_user_id, 'amsa_voting_proxy', true);
-        $this->render_partials('proxy-nomination-header.php', array('current_proxy_id'=>$current_proxy_id, 'post_id'=>$this->post_id, 
+        $this->render_partials('proxy-nomination-header.php', array('current_proxy_id'=>$current_proxy_id, 'post_id'=>$this->post_id,
         'current_principal_ids'=>get_user_meta($this->current_user_id, 'amsa_voting_principals', true)));
     }
 
@@ -131,7 +131,7 @@ class Amsa_Voting_Page {
         if($this->warning_messages){
             echo($this->warning_messages);
         }
-        echo('<div class="amsa-voting-poll-warning-messasges" id="amsa-voting-poll-warning-messasges" style="display: none"><span id="amsa-voting-poll-warning-messasge-text"><span><span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span></div>');
+        echo('<div class="amsa-voting-poll-warning-messasges" id="amsa-voting-poll-warning-messasges" style="display: none"><span id="amsa-voting-poll-warning-messasge-text"></span><span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span></div>');
         // $this->render_partials('poll-headers.php', array('post_id'=>$this->post_id));
 
         // $current_user = wp_get_current_user();
@@ -142,11 +142,11 @@ class Amsa_Voting_Page {
         echo('<div id="amsa-voting-proxy-nomination-header">');
         $this->render_proxy_nomination_header();
         echo('</div>');
-        
+
         echo('<div id="amsa-voting-proxy-nomination-list-wrapper">');
         // place holder for putting in the proxy nomination list
         echo('</div>');
-        
+
         $this->render_partials('display-poll-settings.php', array('anonymous_voting'=>$this->get_single_meta('_anonymous_voting'),
                                                                     'representatives_only'=>$this->get_single_meta('_representatives_only'),
                                                                     'institution_weighted'=>$this->get_single_meta('_institution_weighted'),
@@ -159,7 +159,7 @@ class Amsa_Voting_Page {
 
         echo("</div>");
 
-    
+
     }
 
     public function render_dynamic(){
@@ -168,7 +168,7 @@ class Amsa_Voting_Page {
 
         $this->render_partials('display-poll-status.php', array('poll_status'=>$poll_status));
 
-        if ( $this->is_user_council_master() && $poll_status!=='closed'){
+        if ( $this->is_user_council_master()){
             $this->render_partials('display-admin-box.php', array('post_id'=>$this->post_id,'poll_status'=>$poll_status));
         }
 
@@ -182,7 +182,7 @@ class Amsa_Voting_Page {
             $is_institutional_weighted = $this->get_single_meta('_institution_weighted');
             $is_council_master = $this->is_user_council_master();
 
-            $this->render_partials('voting-counts.php',array('votes'=>$votes, 
+            $this->render_partials('voting-counts.php',array('votes'=>$votes,
             'users_per_vote'=>$users_per_vote,
              'is_anonymous'=>$is_anonymous,
               'is_institutional_weighted'=>$is_institutional_weighted,
@@ -203,7 +203,7 @@ class Amsa_Voting_Page {
                 echo("This poll requires you to be an AMSA rep or representing an AMSA rep");
             }
         }
-        
+
         // render the form
 		if ( $poll_status==='open' && $not_require_rep && !$user_has_proxy){
     		$existing_vote = $this->get_user_vote();
@@ -221,7 +221,7 @@ class Amsa_Voting_Page {
 
     private function get_unvoted_amsa_reps(){
         $amsa_rep_user_ids = get_amsa_reps();
-        $has_voted = array_keys($this->get_single_meta('_voted_users'));     
+        $has_voted = array_keys($this->get_single_meta('_voted_users'));
 
         return array_diff($amsa_rep_user_ids, $has_voted);
 
@@ -256,7 +256,7 @@ class Amsa_Voting_Page {
 		}
 
         $user_presentating_amsa_rep = is_user_representing_amsa_rep($this->current_user_id);
-      
+
 		if($representatives_only && $user_presentating_amsa_rep){
 
 			return true;

@@ -317,6 +317,7 @@ class Amsa_Voting_Admin {
 			'supports'            => array( 'title', 'editor' ),
 			'has_archive'         => true,
 			'rewrite'             => array( 'slug' => 'poll' ),
+			'show_in_rest'		=>true,
 		);
 		
 		register_post_type( $this->post_name, $args );
@@ -328,7 +329,7 @@ class Amsa_Voting_Admin {
 			__( 'Voting Options', 'amsa-voting' ),
 			array($this, 'voting_options_meta_box_callback'),
 			$this->post_name,
-			'normal',
+			'side',
 			'default'
 		);
 		add_meta_box(

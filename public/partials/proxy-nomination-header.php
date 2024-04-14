@@ -8,8 +8,6 @@
  * 
 
  */
-error_log('curent_proxy_id'.print_r($current_proxy_id,true));
-error_log('current_principal_ids'.print_r($current_principal_ids,true));
 
 if($current_proxy_id>0){
     $proxy_university = get_user_meta($current_proxy_id, '_wc_memberships_profile_field_'.get_option('amsa_voting_university_slug'), true);
