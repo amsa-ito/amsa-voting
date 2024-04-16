@@ -400,25 +400,50 @@ a.amsa-voting-active-poll-topics-btn.btn.button {
   text-align: center;
 }
 
-#amsa-voting-speaker-list-wrapper {
-  max-width: 600px; /* Adjust as needed */
-  margin: 0 auto;
+/* Style for wrapper div */
+.amsa-voting-speaker-short-code-wrapper {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Style for warning messages */
+.amsa-voting-speaker-list-warning-messasges {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
+  border-radius: 5px;
+  position: relative;
+}
+
+/* Style for close button in warning messages */
+.closebtn {
+  color: #000;
+  float: right;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.closebtn:hover {
+  color: #f44336;
+}
+
+/* Style for speaker table */
 #amsa-voting-speaker-table {
-  margin-bottom: 20px;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 #amsa-voting-speaker-table th,
 #amsa-voting-speaker-table td {
   padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
-.amsa-voting-speaker-list-no-speaker {
-  text-align: center;
-  color: #999; /* Adjust the color as needed */
-}
-
-.amsa-voting-remove-button {
-  background-color: #dc3545; /* Adjust the color as needed */
+#amsa-voting-speaker-table th {
+  background-color: #f2f2f2;
 }
