@@ -399,3 +399,26 @@ a.amsa-voting-active-poll-topics-btn.btn.button {
   min-width: 75px;
   text-align: center;
 }
+
+#amsa-voting-speaker-list-wrapper {
+  max-width: 600px; /* Adjust as needed */
+  margin: 0 auto;
+}
+
+#amsa-voting-speaker-table {
+  margin-bottom: 20px;
+}
+
+#amsa-voting-speaker-table th,
+#amsa-voting-speaker-table td {
+  padding: 8px;
+}
+
+.amsa-voting-speaker-list-no-speaker {
+  text-align: center;
+  color: #999; /* Adjust the color as needed */
+}
+
+.amsa-voting-remove-button {
+  background-color: #dc3545; /* Adjust the color as needed */
+}

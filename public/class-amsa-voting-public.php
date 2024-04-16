@@ -67,20 +67,13 @@ class Amsa_Voting_Public {
 		add_shortcode('active_poll_topics_overview', array($this,'display_active_poll_topics'));
 		add_filter( 'the_content', array($this, 'voting_page_display' ));
 		add_action('amsa_voting_poll_closed', array($this, 'talley_results'));
-		add_action('amsa_voting_poll_oepn', array($this, 'unfreeze_poll'));
+		add_action('amsa_voting_poll_open', array($this, 'unfreeze_poll'));
 		add_action('wp_ajax_process_and_store_votes', array($this, 'process_and_store_votes'));
-		add_action('wp_ajax_nopriv_process_and_store_votes', function() {
-															wp_send_json_error('You must be logged in to vote.');
-															});
 		add_action( 'wp_ajax_nominate_proxy', array($this, 'nominate_proxy_ajax_handler' ));
 		add_action( 'wp_ajax_retract_proxy', array($this, 'retract_proxy_ajax_handler' ));
 		add_action( 'wp_ajax_diplay_proxy_table', array($this, 'diplay_proxy_table_ajax_handler' ));
 
-
-
 		add_action('wp_ajax_handle_poll_status_change', array($this, 'handle_poll_status_change'));
-		add_action('wp_ajax_nopriv_handle_poll_status_change', array($this, 'handle_poll_status_change'));
-
 		// add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
 	}

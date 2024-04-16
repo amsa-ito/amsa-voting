@@ -57,6 +57,7 @@ class Amsa_Voting_Admin {
 		$this->post_name = $post_name;
 
 		add_action( 'init', array($this,'register_poll_topic_post_type') );
+		add_action( 'init', array($this,'register_post_meta') );
 		add_action( 'init', array($this,'create_amasa_rep_role') );
 		add_action( 'add_meta_boxes', array($this,'voting_options_meta_box') );
 		add_action( 'save_post_'.$this->post_name, array($this, 'save_voting_options_meta_box_data') );
@@ -70,6 +71,11 @@ class Amsa_Voting_Admin {
 		add_filter('manage_'.$this->post_name.'_posts_columns', array($this, 'add_admin_columns_to_poll_topics'));
 		add_action('manage_'.$this->post_name.'_posts_custom_column', array($this, 'populate_poll_topics_columns_with_data'), 10, 2);
 
+
+	
+	}
+
+	public function register_post_meta(){
 		$this->helper_register_post_meta('_voted_users', 'array', array()); #array('user_id'=>array('vote_value'=>))
 		$this->helper_register_post_meta('_voting_threshold', 'string', 'simple_majority');
 		$this->helper_register_post_meta('_poll_status', 'string', 'unvoted');
@@ -93,7 +99,7 @@ class Amsa_Voting_Admin {
 			'single' => true,
 			'default' => array(),
 		));
-	
+
 	}
 
 	function add_admin_columns_to_poll_topics($columns) {
@@ -147,11 +153,21 @@ class Amsa_Voting_Admin {
 	}
 
 	public function add_admin_menu() {
+		add_menu_page(
+			'AMSA Voting',          // Page title
+			'AMSA Voting',          // Menu title
+			'edit_posts',       // Capability
+			'amsa-voting-menu',     // Menu slug
+			'',                     // Function to display the page
+			'dashicons-list-view',  // Icon URL
+			6            
+		);
+
 		add_submenu_page(
-			'edit.php?post_type='.$this->post_name,
+			'amsa-voting-menu',
 			'AMSA Voting Settings', // Page title
 			'Settings', // Menu title
-			'manage_options', // Capability required to see this option
+			'edit_posts', // Capability required to see this option
 			'amsa_voting_settings', // Menu slug
 			array($this, 'amsa_voting_settings_page'), // Function that outputs the page content
 
@@ -310,7 +326,7 @@ class Amsa_Voting_Admin {
 			'labels'              => $labels,
 			'public'              => true,
 			'show_ui'             => true,
-			'show_in_menu'        => true,
+			'show_in_menu'        => 'amsa-voting-menu',
 			'menu_position'       => 20,
 			'menu_icon'           => 'dashicons-chart-pie',
 			'capability_type'     => 'post',

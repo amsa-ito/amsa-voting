@@ -127,6 +127,8 @@ class Amsa_Voting {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-amsa-voting-public.php';
 
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-amsa-voting-speaker-list.php';
+
 		$this->loader = new Amsa_Voting_Loader();
 
 	}
@@ -177,6 +179,8 @@ class Amsa_Voting {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		$speaker_list = new Amsa_Voting_Speaker_List($this->get_plugin_name(), $this->get_version() ,'speaker_list');
 
 	}
 

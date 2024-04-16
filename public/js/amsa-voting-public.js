@@ -244,6 +244,56 @@ jQuery(document).ready(function($) {
 		}
     });
 
+	$('#amsa-voting-speaker-list-wrapper').on('submit', '#nominate-speaker-form', function(e) {
+		e.preventDefault();
+		var data = $(this).serialize();
+		data += '&nonce=' + Theme_Variables.nonce;
+		data = data + '&nonce=' + Theme_Variables.nonce;
+		// var data={
+		// 	nonce: Theme_Variables.nonce,
+		// 	action: 'nominate_speaker',
+		// 	post_id: $(this).find('input[name="post_id"]').val(),	
+		// }
+
+
+		console.log(data);
+		
+		$.post(Theme_Variables.ajax_url, data, function(response) {
+			if (response.success){
+				alert(response.data['message']);
+				console.log(response.data);
+				$('#amsa-voting-speaker-list-wrapper').html(response.data['rendered_content']);
+			}else{
+				alert(response.data);
+				console.log(response);
+			}
+
+		});
+	});
+
+	$('#amsa-voting-speaker-list-wrapper').on('click', '.speaker-removal-button', function(e) {
+		var submitButton = $(this);
+		var data = {
+			nonce: Theme_Variables.nonce,
+			action: 'retract_nomination',
+			post_id: submitButton.data('post-id'),
+			speaker_user_id: submitButton.data('speaker-user-id') // Adjust index for 0-based array
+		};
+	
+		// AJAX setup to handle the removal
+		$.post(Theme_Variables.ajax_url, data, function(response){
+			if (response.success){
+				alert(response.data['message']);
+				$('#amsa-voting-speaker-list-wrapper').html(response.data['rendered_content']);
+			}else{
+				alert(response.data);
+				console.log(response);
+			}
+		
+
+		});
+	});
+
 
 
 
