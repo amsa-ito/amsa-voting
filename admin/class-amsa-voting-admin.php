@@ -70,8 +70,8 @@ class Amsa_Voting_Admin {
 		add_action('wp_ajax_reset_users_proxy_principal_meta', array($this, 'reset_users_proxy_principal_meta'));
 		add_filter('manage_'.$this->post_name.'_posts_columns', array($this, 'add_admin_columns_to_poll_topics'));
 		add_action('manage_'.$this->post_name.'_posts_custom_column', array($this, 'populate_poll_topics_columns_with_data'), 10, 2);
-
-
+		add_filter('post_row_actions', [$this,'duplicate_post_link'], 10, 2);
+		add_action('admin_action_duplicate_'.$this->post_name, [$this, 'duplicate_post_handler']);
 	
 	}
 
@@ -680,6 +680,55 @@ class Amsa_Voting_Admin {
 		}
 		wp_send_json_success(array('message' => 'User meta reset to default values for all affected users.'));
 		// error_log(print_r(sizeof($users) ,true));
+	}
+
+	public function duplicate_post_link($actions, $post) {
+		if ($post->post_type == $this->post_name) {
+			$actions['duplicate'] = '<a href="' . admin_url('admin.php?action=duplicate_'.$this->post_name.'&post=' . $post->ID) . '" title="Duplicate this item" rel="permalink">Duplicate</a>';
+		}
+		return $actions;
+	}
+
+	public function duplicate_post_handler() {
+		if (!isset($_GET['post']) || !isset($_GET['action']) || $_GET['action'] != 'duplicate_'.$this->post_name) {
+			return;
+		}
+	
+		$post_id = absint($_GET['post']);
+		$post = get_post($post_id);
+	
+		if (empty($post) || !current_user_can('edit_post', $post_id)) {
+			wp_die('Error occurred while duplicating the post.');
+		}
+	
+		$new_post_args = array(
+			'post_title' => $post->post_title . ' (Copy)',
+			'post_content' => $post->post_content,
+			'post_status' => 'draft', // Or any other status you prefer
+			'post_type' => $post->post_type,
+		);
+	
+		$new_post_id = wp_insert_post($new_post_args);
+
+		$exclusion_meta = ['_voted_users', '_poll_status','_voting_outcome','_final_voted_numbers','_final_voted_users'];
+	
+		if ($new_post_id) {
+			// Duplicate post meta
+			$post_meta = get_post_meta($post_id);
+			foreach ($post_meta as $meta_key => $meta_values) {
+				if(in_array($meta_key, $exclusion_meta)){
+					continue;
+				}
+				foreach ($meta_values as $meta_value) {
+					add_post_meta($new_post_id, $meta_key, maybe_unserialize($meta_value));
+				}
+			}
+			// Redirect to the new duplicated post
+			wp_redirect(admin_url('post.php?action=edit&post=' . $new_post_id));
+			exit();
+		} else {
+			wp_die('Error occurred while duplicating the post.');
+		}
 	}
 
 	/**
