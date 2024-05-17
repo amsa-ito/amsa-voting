@@ -56,11 +56,12 @@ class Amsa_Voting_Admin {
 		$this->version = $version;
 		$this->post_name = $post_name;
 
-		add_action( 'init', array($this,'register_poll_topic_post_type') );
-		add_action( 'init', array($this,'register_post_meta') );
+		// add_action( 'init', array($this,'register_poll_topic_post_type') );
+		// add_action( 'init', array($this,'register_post_meta') );
 		add_action( 'init', array($this,'create_amasa_rep_role') );
-		add_action( 'add_meta_boxes', array($this,'voting_options_meta_box') );
-		add_action( 'save_post_'.$this->post_name, array($this, 'save_voting_options_meta_box_data') );
+		add_action('init', array($this, 'add_council_master_permission'));
+		// add_action( 'add_meta_boxes', array($this,'voting_options_meta_box') );
+		// add_action( 'save_post_'.$this->post_name, array($this, 'save_voting_options_meta_box_data') );
 		add_action('admin_menu', array($this, 'add_admin_menu'));
 		add_action('admin_init', array($this, 'settings_init'));
 		add_action('wp_ajax_download_amsa_rep_example_csv', array($this, 'generate_amsa_rep_csv'));
@@ -68,88 +69,13 @@ class Amsa_Voting_Admin {
 		add_action('wp_ajax_download_example_csv_proxy', array($this, 'download_example_csv_proxy'));
 		add_action('wp_ajax_map_proxies_from_csv', array($this, 'map_proxies_from_csv'));
 		add_action('wp_ajax_reset_users_proxy_principal_meta', array($this, 'reset_users_proxy_principal_meta'));
-		add_filter('manage_'.$this->post_name.'_posts_columns', array($this, 'add_admin_columns_to_poll_topics'));
-		add_action('manage_'.$this->post_name.'_posts_custom_column', array($this, 'populate_poll_topics_columns_with_data'), 10, 2);
-		add_filter('post_row_actions', [$this,'duplicate_post_link'], 10, 2);
-		add_action('admin_action_duplicate_'.$this->post_name, [$this, 'duplicate_post_handler']);
+		// add_filter('manage_'.$this->post_name.'_posts_columns', array($this, 'add_admin_columns_to_poll_topics'));
+		// add_action('manage_'.$this->post_name.'_posts_custom_column', array($this, 'populate_poll_topics_columns_with_data'), 10, 2);
+		// add_filter('post_row_actions', [$this,'duplicate_post_link'], 10, 2);
+		// add_action('admin_action_duplicate_'.$this->post_name, [$this, 'duplicate_post_handler']);
+
+
 	
-	}
-
-	public function register_post_meta(){
-		$this->helper_register_post_meta('_voted_users', 'array', array()); #array('user_id'=>array('vote_value'=>))
-		$this->helper_register_post_meta('_voting_threshold', 'string', 'simple_majority');
-		$this->helper_register_post_meta('_poll_status', 'string', 'unvoted');
-		$this->helper_register_post_meta('_voting_outcome', 'integer', 0); # 0 for no result, 1 for pass, 2 for fail, 3 for chair's call
-		$this->helper_register_post_meta('_anonymous_voting', 'integer', 0);
-		$this->helper_register_post_meta('_representatives_only', 'integer', 0);
-		$this->helper_register_post_meta('_institution_weighted', 'integer', 0);
-		$this->helper_register_post_meta('_final_voted_numbers', 'array', array()); //['for'=sum_of_weights, 'away'=sum_of_weights, 'abstain'=sum_of_weights]
-		$this->helper_register_post_meta('_final_voted_users', 'array', array()); //['for'=[user_ids...],'against'=[user_ids...],'abstain'=[user_ids...]]
-
-		register_meta('user', 'amsa_voting_proxy', array(
-			'type' => 'integer',
-			'description' => 'AMSO voting proxy',
-			'single' => true,
-			'default' => -1,
-			'sanitize_callback' => 'int' // Ensure the value is an integer
-		));
-		register_meta('user', 'amsa_voting_principals', array(
-			'type' => 'array',
-			'description' => 'AMSA voting principals',
-			'single' => true,
-			'default' => array(),
-		));
-
-	}
-
-	function add_admin_columns_to_poll_topics($columns) {
-		$columns['_voting_threshold'] = 'Voting Threshold';
-		$columns['_poll_status'] = 'Poll Status';
-		$columns['_voting_outcome'] = 'Voting Outcome';
-		$columns['_anonymous_voting'] = 'Anonymous Voting';
-		$columns['_representatives_only'] = 'Representatives Only';
-		$columns['_institution_weighted'] = 'Institution Weighted';
-		return $columns;
-	}
-	
-	// Populate custom columns with data
-	function populate_poll_topics_columns_with_data($column, $post_id) {
-		switch ($column) {
-			case '_voting_threshold':
-				echo get_post_meta($post_id, '_voting_threshold', true);
-				break;
-			case '_poll_status':
-				echo get_post_meta($post_id, '_poll_status', true);
-				break;
-			case '_voting_outcome':
-				$voting_outcome = get_post_meta($post_id, '_voting_outcome', true);
-				
-				if ($voting_outcome == 0) {
-					echo '-';
-				} elseif ($voting_outcome == 1) {
-					echo 'Carried';
-				} elseif ($voting_outcome == 2) {
-					echo 'Lost';
-				} elseif ($voting_outcome == 3) {
-					echo 'Tied';
-				} else {
-					echo 'There was a problem with the voting_outcome data';
-					// Handle default case
-				}
-				break;
-			case '_anonymous_voting':
-				echo get_post_meta($post_id, '_anonymous_voting', true) ? '&#10004;' : '&#10008;';
-				break;
-			case '_representatives_only':
-				echo get_post_meta($post_id, '_representatives_only', true)? '&#10004;' : '&#10008;';
-				break;
-			case '_institution_weighted':
-				echo get_post_meta($post_id, '_institution_weighted', true)? '&#10004;' : '&#10008;';
-				break;
-			default:
-				// Handle default case
-				break;
-		}
 	}
 
 	public function add_admin_menu() {
@@ -227,6 +153,14 @@ class Amsa_Voting_Admin {
 		<?php
 	}
 
+	public function add_council_master_permission(){
+		 // Get all existing roles
+		 global $wp_roles;
+
+		 $wp_roles->add_cap('council_master','is_council_master');
+		
+	}
+
 	public function settings_init() {
 		// Register a new setting for the "AMSA Voting" page
 		register_setting('amsa_voting_options_group', 'amsa_voting_university_slug');
@@ -294,154 +228,7 @@ class Amsa_Voting_Admin {
 		return $university_profile_field->get_options();
 	}
 
-	private function helper_register_post_meta($meta_key, $type, $default=NULL){
-		register_post_meta(
-			$this->post_name,
-			$meta_key,
-			array(
-				'single'=>true,
-				'type'=>$type,
-				'default'=>$default
-			)
-			);
-	}
 
-	public function register_poll_topic_post_type() {
-		$labels = array(
-			'name'               => __( 'Poll Topics', 'amsa-voting' ),
-			'singular_name'      => __( 'Poll Topic', 'amsa-voting' ),
-			'add_new'            => __( 'Add New', 'amsa-voting' ),
-			'add_new_item'       => __( 'Add New Poll Topic', 'amsa-voting' ),
-			'edit_item'          => __( 'Edit Poll Topic', 'amsa-voting' ),
-			'new_item'           => __( 'New Poll Topic', 'amsa-voting' ),
-			'view_item'          => __( 'View Poll Topic', 'amsa-voting' ),
-			'search_items'       => __( 'Search Poll Topics', 'amsa-voting' ),
-			'not_found'          => __( 'No Poll Topics found', 'amsa-voting' ),
-			'not_found_in_trash' => __( 'No Poll Topics found in Trash', 'amsa-voting' ),
-			'parent_item_colon'  => __( 'Parent Poll Topic:', 'amsa-voting' ),
-			'menu_name'          => __( 'Poll Topics', 'amsa-voting' ),
-		);
-	
-		$args = array(
-			'labels'              => $labels,
-			'public'              => true,
-			'show_ui'             => true,
-			'show_in_menu'        => 'amsa-voting-menu',
-			'menu_position'       => 20,
-			'menu_icon'           => 'dashicons-chart-pie',
-			'capability_type'     => 'post',
-			'supports'            => array( 'title', 'editor' ),
-			'has_archive'         => true,
-			'rewrite'             => array( 'slug' => 'poll' ),
-			'show_in_rest'		=>true,
-		);
-		
-		register_post_type( $this->post_name, $args );
-	}
-
-	public function voting_options_meta_box() {
-		add_meta_box(
-			'amsa-voting-options',
-			__( 'Voting Options', 'amsa-voting' ),
-			array($this, 'voting_options_meta_box_callback'),
-			$this->post_name,
-			'side',
-			'default'
-		);
-		add_meta_box(
-			'amsa-voting-shortcode',
-			__( 'Voting Shortcode', 'amsa-voting' ),
-			array($this, 'shortcode_meta_box_callback'),
-			$this->post_name,
-			'side', // Display on the side
-			'default'
-		);
-	}
-
-	public function shortcode_meta_box_callback($post) {
-		// Get the post ID
-		$post_id = $post->ID;
-		// Generate shortcode based on post ID or any other relevant information
-		$shortcode = '['.str_replace('-','_',$this->plugin_name.'_'.$this->post_name).' poll_id="' . $post_id . '"]';
-		// Display the shortcode
-		echo '<p>Copy and paste this shortcode to embed the voting page: <br><code>' . $shortcode . '</code></p>';
-	}
-
-	public function voting_options_meta_box_callback( $post ) {
-		$poll_status = get_post_meta( $post->ID, '_poll_status', true );
-
-		// Check if the poll status is 'closed'
-		$disabled = ($poll_status === 'closed') ? 'disabled' : '';
-
-		$anonymous_voting = get_post_meta( $post->ID, '_anonymous_voting', true );
-		// $roll_call = get_post_meta( $post->ID, '_roll_call', true );
-		$representatives_only = get_post_meta( $post->ID, '_representatives_only', true );
-		$institution_weighted = get_post_meta( $post->ID, '_institution_weighted', true );
-	
-		// Voting options checkboxes
-		if($poll_status==='closed'){
-			echo("Poll has been closed, settings can no longer be changed<br>");
-		}
-		?>
-		<label for="anonymous_voting">
-			<input type="checkbox" name="anonymous_voting" id="anonymous_voting" value="1" <?php checked( $anonymous_voting, 1 ); echo $disabled; ?>>
-			<?php _e( 'Anonymous Voting', 'amsa-voting' ); ?>
-		</label><br>
-		<!--
-		<label for="roll_call">
-			<input type="checkbox" name="roll_call" id="roll_call" value="1" <?php //checked( $roll_call, 1 ); ?>>
-			<?php //_e( 'Roll Call Required', 'amsa-voting' ); ?>
-		</label><br>
-	-->
-		<label for="representative_voting_only">
-			<input type="checkbox" name="representatives_only" id="representatives_only" value="1" <?php checked( $representatives_only, 1 ); echo $disabled;?>>
-			<?php _e( 'Representatives Voting Only', 'amsa-voting' ); ?>
-		</label><br>
-		<label for="institution_weighted">
-			<input type="checkbox" name="institution_weighted" id="institution_weighted" value="1" <?php checked( $institution_weighted, 1 ); echo $disabled;?>>
-			<?php _e( 'Institution-Weighted Vote', 'amsa-voting' ); ?>
-		</label><br>
-	
-		<hr>
-	
-		<p><?php _e( 'Voting Threshold:', 'amsa-voting' ); ?></p>
-		<label>
-			<input type="radio" name="voting_threshold" value="simple_majority" checked='checked' <?php checked( get_post_meta( $post->ID, '_voting_threshold', true ), 'simple_majority' ); echo $disabled;?>>
-			<?php _e( 'Simple Majority (1/2 of votes)', 'amsa-voting' ); ?>
-		</label><br>
-		<label>
-			<input type="radio" name="voting_threshold" value="supermajority" <?php checked( get_post_meta( $post->ID, '_voting_threshold', true ), 'supermajority' ); echo $disabled;?>>
-			<?php _e( 'Supermajority (2/3 of votes)', 'amsa-voting' ); ?>
-		</label>
-		<?php
-	}
-
-	public function save_voting_options_meta_box_data( $post_id ) {
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-
-		// Check if the poll is closed
-		$poll_status = get_post_meta( $post_id, '_poll_status', true );
-		if ($poll_status === 'closed') {
-			// Do not save any changes if the poll is closed
-			return;
-		}
-	
-		$fields = array( 'anonymous_voting', 'representatives_only', 'institution_weighted', 'voting_threshold' );
-	
-		foreach ( $fields as $field ) {
-			if ( isset( $_POST[ $field ] ) ) {
-				update_post_meta( $post_id, '_' . $field, sanitize_text_field( $_POST[ $field ] ) );
-			} else {
-				delete_post_meta( $post_id, '_' . $field );
-			}
-		}
-		// Enforce representatives only if institution weighted is checked
-		if (isset($_POST['institution_weighted']) && $_POST['institution_weighted'] == '1') {
-			update_post_meta( $post_id, '_representatives_only', '1' );
-		}
-	}
 
 	public function generate_amsa_rep_csv() {
 		$universities = $this->get_registered_universities();
@@ -681,55 +468,9 @@ class Amsa_Voting_Admin {
 		wp_send_json_success(array('message' => 'User meta reset to default values for all affected users.'));
 		// error_log(print_r(sizeof($users) ,true));
 	}
+	
 
-	public function duplicate_post_link($actions, $post) {
-		if ($post->post_type == $this->post_name) {
-			$actions['duplicate'] = '<a href="' . admin_url('admin.php?action=duplicate_'.$this->post_name.'&post=' . $post->ID) . '" title="Duplicate this item" rel="permalink">Duplicate</a>';
-		}
-		return $actions;
-	}
 
-	public function duplicate_post_handler() {
-		if (!isset($_GET['post']) || !isset($_GET['action']) || $_GET['action'] != 'duplicate_'.$this->post_name) {
-			return;
-		}
-	
-		$post_id = absint($_GET['post']);
-		$post = get_post($post_id);
-	
-		if (empty($post) || !current_user_can('edit_post', $post_id)) {
-			wp_die('Error occurred while duplicating the post.');
-		}
-	
-		$new_post_args = array(
-			'post_title' => $post->post_title . ' (Copy)',
-			'post_content' => $post->post_content,
-			'post_status' => 'draft', // Or any other status you prefer
-			'post_type' => $post->post_type,
-		);
-	
-		$new_post_id = wp_insert_post($new_post_args);
-
-		$exclusion_meta = ['_voted_users', '_poll_status','_voting_outcome','_final_voted_numbers','_final_voted_users'];
-	
-		if ($new_post_id) {
-			// Duplicate post meta
-			$post_meta = get_post_meta($post_id);
-			foreach ($post_meta as $meta_key => $meta_values) {
-				if(in_array($meta_key, $exclusion_meta)){
-					continue;
-				}
-				foreach ($meta_values as $meta_value) {
-					add_post_meta($new_post_id, $meta_key, maybe_unserialize($meta_value));
-				}
-			}
-			// Redirect to the new duplicated post
-			wp_redirect(admin_url('post.php?action=edit&post=' . $new_post_id));
-			exit();
-		} else {
-			wp_die('Error occurred while duplicating the post.');
-		}
-	}
 
 	/**
 	 * Register the stylesheets for the admin area.
@@ -773,7 +514,7 @@ class Amsa_Voting_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/amsa-voting-admin.js', array( 'jquery' ), time(), false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/amsa-voting-admin.js', array( 'jquery' ), $this->version, false );
 
 	}
 
