@@ -319,6 +319,81 @@ jQuery(document).ready(function($) {
 		}
 	});
 
+	$('#ballot_form').on('submit', function(e) {
+		e.preventDefault();
+
+		// Create an object to store candidate preferences
+		var candidatePreferences = {};
+
+		// Loop through each select element in the form
+		$(this).find('select[name="candidate_preference[]"]').each(function() {
+			// Extract candidate name and preference value
+			var candidateName = $(this).attr('id').replace('candidate_', '');
+			var preferenceValue = $(this).val();
+	
+			// Store candidate preference in the object
+			candidatePreferences[candidateName] = preferenceValue;
+		});
+
+		    // Serialize the object into form data
+		var formData = $.param(candidatePreferences);
+		var nonce = Theme_Variables.nonce;
+
+		$.ajax({
+			url: Theme_Variables.ajax_url,
+			type: 'POST',
+			data: {
+				action: 'cast_ballot',
+				nonce: nonce,
+				candidate_preference: candidatePreferences,
+				post_id: $('input[name="post_id"]').val()
+			},
+			success: function(response) {
+				if (response.success) {
+					$('#amsa-voting-ballot-warning-messasge-text').html('Your vote is in!');
+					// $('#ballot_form').replaceWith(response.data.rendered_content);
+					alert(response.data.message);
+				} else {
+					alert(response.data);
+				}
+			},
+			error: function(xhr, status, error) {
+				console.error(xhr.responseText);
+			}
+		});
+	});
+
+	var optionsTemplate = {};
+	$('.candidate-select').each(function() {
+		var $select = $(this);
+		var id = $select.attr('id');
+		optionsTemplate[id] = $select.html();
+	});
+
+	$('.candidate-select').on('change', function() {
+		updateOptions();
+	});
+
+	function updateOptions() {
+		var selectedValues = $('.candidate-select').map(function() {
+			return $(this).val();
+		}).get();
+
+		$('.candidate-select').each(function() {
+			var $select = $(this);
+			var currentValue = $select.val();
+			$select.html(optionsTemplate[$select.attr('id')]); // Reset options
+			$select.val(currentValue); // Restore selected value
+
+			$select.find('option').each(function() {
+				var $option = $(this);
+				if ($option.val() !== "" && $option.val() !== currentValue && selectedValues.includes($option.val())) {
+					$option.remove();
+				}
+			});
+		});
+	}
+
 
 
 

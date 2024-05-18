@@ -103,7 +103,7 @@ class Amsa_Voting_Public {
 		 * class.
 		 */
 		// wp_register_script($this->plugin_name, false, array("jquery"), false, array( 'in_footer' => true ));
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/amsa-voting-public.js', array( 'jquery' ), $this->$version, true );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/amsa-voting-public.js', array( 'jquery' ), time(), true );
 		$variable_to_js = [
 			'ajax_url' => admin_url('admin-ajax.php'),
 			'nonce' => wp_create_nonce($this->plugin_name.'-nonce')
