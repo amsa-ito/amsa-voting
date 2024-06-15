@@ -43,23 +43,23 @@ class Amsa_Voting_Poll_Topics_Public {
 
     public function set_user_default_proxy(){
         if(!$this->current_user_id){
-            return;
+            return "";
         }
         $current_user_roles = get_user_meta($this->current_user_id, 'wp_capabilities', true);
         if(array_key_exists('amsa_rep', $current_user_roles)){
-            return;
+            return "";
         }
         $current_principals=get_user_meta($this->current_user_id, 'amsa_voting_principals', true);
        
         if($current_principals){
             // they can't actually be proxying anyone
             update_user_meta($this->current_user_id ,'amsa_voting_proxy', 0);
-            return;
+            return "";
         }
         $current_proxy_id = get_user_meta($this->current_user_id, 'amsa_voting_proxy', true);
         $current_user_university = get_user_meta($this->current_user_id, '_wc_memberships_profile_field_'.get_option('amsa_voting_university_slug'), true);
         if(!$current_user_university){
-            return "<div class='amsa-voting-default-proxy-warning'>Please complete your profile fields in your <a href='". get_permalink( get_option('woocommerce_myaccount_page_id') )."' title=My Account>Membership Profile</a></div>";
+            return "Please complete your profile fields in your <a href='". get_permalink( get_option('woocommerce_myaccount_page_id') )."' title=My Account>Membership Profile</a>";
 
         }
         // default proxy_id is -1
@@ -83,11 +83,12 @@ class Amsa_Voting_Poll_Topics_Public {
             if (!empty($users)) {
                 $proxy_user = $users[0];
                 nominate_proxy($proxy_user->ID, $this->current_user_id);
-                return "<div class='amsa-voting-default-proxy-warning'><p>By default AMSA Member's vote goes to your AMSA Rep, but you can retract your proxy.</p></div>";
+                return "By default AMSA Member's vote goes to your AMSA Rep, but you can retract your proxy";
             }else{
-                return "<div class='amsa-voting-default-proxy-warning'><p>By default AMSA Member's vote goes to your AMSA Rep, but your AMSA Rep couldn't be found for your university.</p></div>";
+                return "By default AMSA Member's vote goes to your AMSA Rep, but your AMSA Rep couldn't be found for your university";
             }
         }
+        return "";
 
     }
 
@@ -126,10 +127,7 @@ class Amsa_Voting_Poll_Topics_Public {
 
     public function render() {
         echo('<div class="amsa-voting-poll-topic-wrapper" id="poll-topic-'.$this->post_id.'">');
-        if($this->warning_messages){
-            echo($this->warning_messages);
-        }
-        echo('<div class="amsa-voting-poll-warning-messasges" id="amsa-voting-poll-warning-messasges" style="display: none"><span id="amsa-voting-poll-warning-messasge-text"></span><span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span></div>');
+        echo('<div class="amsa-voting-poll-warning-messasges" id="amsa-voting-poll-warning-messasges" style="display: none"><span id="amsa-voting-poll-warning-messasge-text">'.$this->warning_messages.'</span><span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span></div>');
         // $this->render_partials('poll-headers.php', array('post_id'=>$this->post_id));
 
         // $current_user = wp_get_current_user();

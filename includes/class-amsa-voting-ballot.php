@@ -19,6 +19,8 @@ class Amsa_Voting_Ballot{
         add_action('save_post', array($this, 'save_meta_box_data'));
         add_filter( 'the_content', array($this, 'ballot_page_display' ));
 		add_action('wp_ajax_cast_ballot', array($this, 'handle_ajax_cast_ballot'));
+		add_action('wp_ajax_handle_ballot_status_change', array($this, 'handle_ballot_status_change'));
+
 
         add_filter('post_row_actions', [$this,'duplicate_post_link'], 10, 2);
 		add_action('admin_action_duplicate_'.$this->post_name, [$this, 'duplicate_post_handler']);
@@ -285,6 +287,34 @@ class Amsa_Voting_Ballot{
 
         exit;
     }
+
+    public function handle_ballot_status_change() {
+		check_ajax_referer($this->plugin_name.'-nonce', 'nonce');
+
+		if (isset($_POST['poll_status_change'])) {
+
+			$post_id = intval($_POST['post_id']);
+			$voting_page = new Amsa_Voting_Ballot_Public($post_id);
+
+			if (is_user_council_master()) {
+				$current_status = get_post_meta($post_id, '_poll_status', true);
+
+				$new_status = ($current_status === 'open') ? 'closed' : 'open';
+				update_post_meta($post_id, '_poll_status', $new_status);
+				update_post_meta($post_id, '_poll_' . $new_status . '_timestamp', current_time('timestamp'));
+
+
+				ob_start();
+				$voting_page->render_dynamic();
+				$success_json = array('poll_status'=>$new_status, 'rendered_content'=> ob_get_clean());
+				wp_send_json_success($success_json);
+
+			}
+		}
+		wp_die();
+
+	}
+
 
 
 

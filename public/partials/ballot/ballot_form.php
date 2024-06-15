@@ -14,13 +14,13 @@ if (empty($candidates) || !is_array($candidates)) {
     $candidate_count = count($candidates);
     ?>
     <form method="post" action="" id="ballot_form">
-    <h2>Select Your Preferences</h2>
+    <h3>Select Your Preferences</h3>
 
     <?php
         foreach ($candidates as $candidate) {
             ?>
             <label for="candidate_<?php echo esc_attr($candidate)?>"><?php echo esc_html($candidate) ?></label>
-            <select name="candidate_preference[]" id="candidate_<?php echo esc_attr($candidate) ?>" class="candidate-select">
+            <select name="candidate_preference[]" id="candidate_<?php echo esc_attr($candidate) ?>" class="candidate-select" required>
             <option value="">Select preference</option>
             <?php
             for ($i = 1; $i <= $candidate_count; $i++) {

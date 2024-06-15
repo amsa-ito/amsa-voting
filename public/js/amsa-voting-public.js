@@ -101,13 +101,9 @@ jQuery(document).ready(function($) {
 		}).always(function(){
 			submitButton.prop('disabled', false);
 			wrapper.find('.loading-spinner').remove();
-			scrollToElement('#amsa-voting-poll-warning-messasge-text');
+			scrollToElement('.poll-status-display');
 		});
 	});
-
-	var timeout; // Variable to store the timeout
-
-	// Function to run when #myInput changes
 
 	
 	$("#amsa-voting-proxy-nomination-list-wrapper").on("keyup", '#amsa-voting-search-proxy', function() {
@@ -319,9 +315,10 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	$('#ballot_form').on('submit', function(e) {
+	$('#amsa-voting-ballot-wrapper').on('submit', '#ballot_form', function(e) {
 		e.preventDefault();
-
+		var wrapper = $('#amsa-voting-ballot-wrapper');
+		wrapper.append(spinner);
 		// Create an object to store candidate preferences
 		var candidatePreferences = {};
 
@@ -335,8 +332,6 @@ jQuery(document).ready(function($) {
 			candidatePreferences[candidateName] = preferenceValue;
 		});
 
-		    // Serialize the object into form data
-		var formData = $.param(candidatePreferences);
 		var nonce = Theme_Variables.nonce;
 
 		$.ajax({
@@ -350,9 +345,8 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					$('#amsa-voting-ballot-warning-messasge-text').html('Your vote is in!');
-					// $('#ballot_form').replaceWith(response.data.rendered_content);
-					alert(response.data.message);
+					add_poll_warning_message("Your vote is in!");
+					
 				} else {
 					alert(response.data);
 				}
@@ -360,17 +354,30 @@ jQuery(document).ready(function($) {
 			error: function(xhr, status, error) {
 				console.error(xhr.responseText);
 			}
+		}).always(function(){
+			wrapper.find('.loading-spinner').remove();
+			scrollToElement('.poll-status-display');
 		});
 	});
 
 	var optionsTemplate = {};
-	$('.candidate-select').each(function() {
-		var $select = $(this);
-		var id = $select.attr('id');
-		optionsTemplate[id] = $select.html();
+	function getOptionsTemplate(){
+		$('.candidate-select').each(function() {
+			var $select = $(this);
+			var id = $select.attr('id');
+			optionsTemplate[id] = $select.html();
+		});
+	}
+
+	var click_counter = 0;
+	$('#amsa-voting-ballot-wrapper').on('click', '.candidate-select', function() {
+		if(click_counter<=0){
+			getOptionsTemplate();
+		}
+		click_counter = click_counter+1;
 	});
 
-	$('.candidate-select').on('change', function() {
+	$('#amsa-voting-ballot-wrapper').on('change', '.candidate-select', function() {
 		updateOptions();
 	});
 
@@ -394,9 +401,38 @@ jQuery(document).ready(function($) {
 		});
 	}
 
+	$('#amsa-voting-ballot-wrapper').on('click','#ballot_status_change', function(event) {
+		var postID = $('#admin-toggle-ballot-status').data('post_id');
+		var wrapper = $('#amsa-voting-ballot-wrapper');
+		var submitButton = $('#ballot_status_change');
 
+		submitButton.prop('disabled', true);
+		wrapper.append(spinner);
 
-
-
+		var data= {
+			'action': 'handle_ballot_status_change',
+			'post_id': postID,
+			'poll_status_change':1,
+			'nonce': Theme_Variables.nonce
+		};
+		
+		$.post(Theme_Variables.ajax_url, data, function(response){
+			console.log(response.success);
+			if (response.success){
+				wrapper.html(response.data['rendered_content']);
+				add_poll_warning_message("Ballot is now "+response.data['poll_status']);
+				// location.reload(true);
+			} else{
+				console.log(response);
+				add_poll_warning_message("There was a problem with opening the ballot");
+			}
+		}).fail(function() {
+            add_poll_warning_message('There was a problem with opening the ballot. Please try again.');
+		}).always(function(){
+			submitButton.prop('disabled', false);
+			wrapper.find('.loading-spinner').remove();
+			scrollToElement('.poll-status-display');
+		});
+	});
 
 });

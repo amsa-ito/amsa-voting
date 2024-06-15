@@ -402,33 +402,40 @@ a.amsa-voting-active-poll-topics-btn.btn.button {
 
 /* Style for wrapper div */
 .amsa-voting-speaker-short-code-wrapper {
-  font-family: Arial, sans-serif;
   padding: 20px;
-  background-color: #f5f5f5;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  font-size: 13px;
+}
+
+form#nominate-speaker-form input {
+  font-size: 12px !important;
+  text-transform: uppercase!important;
+  font-weight: 700!important;
+  margin-top: 20px!important;
 }
 
 /* Style for warning messages */
 .amsa-voting-speaker-list-warning-messasges {
   margin-bottom: 15px;
-  padding: 10px;
-  background-color: #ffcccc;
-  border: 1px solid #ff0000;
-  border-radius: 5px;
-  position: relative;
+  background: #c02e2e;
+  color: #FFF;
+  border: none;
+  font-weight: 700;
+  padding: 5px 10px;
+  text-transform: uppercase;
 }
 
 /* Style for close button in warning messages */
 .closebtn {
-  color: #000;
+  color: #fff;
   float: right;
   font-weight: bold;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .closebtn:hover {
-  color: #f44336;
+  color: #fff;
 }
 
 /* Style for speaker table */
@@ -439,11 +446,27 @@ a.amsa-voting-active-poll-topics-btn.btn.button {
 
 #amsa-voting-speaker-table th,
 #amsa-voting-speaker-table td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+  background: none;
+  border: none;
+  padding: 0 4px;
 }
 
-#amsa-voting-speaker-table th {
-  background-color: #f2f2f2;
+button.speaker-removal-button {
+  color: #FFF !important;
+  padding: 3px 8px;
+}
+
+.amsa-voting-real-time-switch {
+  background: #FFF;
+  padding: 10px 20px 0 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.amsa-voting-ballot-wrapper {
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 20px;
 }
