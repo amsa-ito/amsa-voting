@@ -146,4 +146,9 @@ jQuery(document).ready(function($) {
             $representativesCheckbox.prop('disabled', false); // Enable when weighted is not checked
         }
     });
+    
+    $('#add_candidate_button').on('click', function(e) {
+        e.preventDefault();
+        $('#amsa-voting-candidates').append('<p><input type="text" name="amsa_voting_candidates[]" /></p>');
+    });
 });

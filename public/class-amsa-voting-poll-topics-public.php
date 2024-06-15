@@ -3,7 +3,7 @@
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/amsa-voting-functions.php';
 
 
-class Amsa_Voting_Page {
+class Amsa_Voting_Poll_Topics_Public {
     private $post_id;
     public $current_user;
     public $current_user_id;
@@ -20,7 +20,7 @@ class Amsa_Voting_Page {
 
     public static function render_partials($partial_path, $args = array()) {
         // Construct the full path to the partial file
-        $partial_file = plugin_dir_path(__FILE__) . 'partials/' . $partial_path;
+        $partial_file = plugin_dir_path(__FILE__) . 'poll_topics/partials/' . $partial_path;
 
         // Ensure the partial file exists
         if (!file_exists($partial_file)) {
@@ -43,25 +43,23 @@ class Amsa_Voting_Page {
 
     public function set_user_default_proxy(){
         if(!$this->current_user_id){
-            return;
+            return "";
         }
         $current_user_roles = get_user_meta($this->current_user_id, 'wp_capabilities', true);
         if(array_key_exists('amsa_rep', $current_user_roles)){
-            return;
+            return "";
         }
         $current_principals=get_user_meta($this->current_user_id, 'amsa_voting_principals', true);
-        error_log(print_r($current_principals,true));
-        error_log(print_r(get_user_meta($this->current_user_id, 'amsa_voting_proxy', true),true));
-
+       
         if($current_principals){
             // they can't actually be proxying anyone
             update_user_meta($this->current_user_id ,'amsa_voting_proxy', 0);
-            return;
+            return "";
         }
         $current_proxy_id = get_user_meta($this->current_user_id, 'amsa_voting_proxy', true);
         $current_user_university = get_user_meta($this->current_user_id, '_wc_memberships_profile_field_'.get_option('amsa_voting_university_slug'), true);
         if(!$current_user_university){
-            return "<div class='amsa-voting-default-proxy-warning'>Please complete your profile fields in your <a href='". get_permalink( get_option('woocommerce_myaccount_page_id') )."' title=My Account>Membership Profile</a></div>";
+            return "Please complete your profile fields in your <a href='". get_permalink( get_option('woocommerce_myaccount_page_id') )."' title=My Account>Membership Profile</a>";
 
         }
         // default proxy_id is -1
@@ -85,11 +83,12 @@ class Amsa_Voting_Page {
             if (!empty($users)) {
                 $proxy_user = $users[0];
                 nominate_proxy($proxy_user->ID, $this->current_user_id);
-                return "<div class='amsa-voting-default-proxy-warning'><p>By default AMSA Member's vote goes to your AMSA Rep, but you can retract your proxy.</p></div>";
+                return "By default AMSA Member's vote goes to your AMSA Rep, but you can retract your proxy";
             }else{
-                return "<div class='amsa-voting-default-proxy-warning'><p>By default AMSA Member's vote goes to your AMSA Rep, but your AMSA Rep couldn't be found for your university.</p></div>";
+                return "By default AMSA Member's vote goes to your AMSA Rep, but your AMSA Rep couldn't be found for your university";
             }
         }
+        return "";
 
     }
 
@@ -128,10 +127,7 @@ class Amsa_Voting_Page {
 
     public function render() {
         echo('<div class="amsa-voting-poll-topic-wrapper" id="poll-topic-'.$this->post_id.'">');
-        if($this->warning_messages){
-            echo($this->warning_messages);
-        }
-        echo('<div class="amsa-voting-poll-warning-messasges" id="amsa-voting-poll-warning-messasges" style="display: none"><span id="amsa-voting-poll-warning-messasge-text"></span><span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span></div>');
+        echo('<div class="amsa-voting-poll-warning-messasges" id="amsa-voting-poll-warning-messasges" style="display: none"><span id="amsa-voting-poll-warning-messasge-text">'.$this->warning_messages.'</span><span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span></div>');
         // $this->render_partials('poll-headers.php', array('post_id'=>$this->post_id));
 
         // $current_user = wp_get_current_user();
@@ -168,7 +164,7 @@ class Amsa_Voting_Page {
 
         $this->render_partials('display-poll-status.php', array('poll_status'=>$poll_status));
 
-        if ( $this->is_user_council_master()){
+        if ( is_user_council_master()){
             $this->render_partials('display-admin-box.php', array('post_id'=>$this->post_id,'poll_status'=>$poll_status));
         }
 
@@ -176,11 +172,11 @@ class Amsa_Voting_Page {
 		if ($poll_status==='closed'){
             $this->render_partials('voting-result.php',array('post_id'=>$this->post_id));
 		}
-		if ($poll_status==='closed' || $this->is_user_council_master()){
+		if ($poll_status==='closed' || is_user_council_master()){
             $votes=calculate_votes($this->post_id);
             $users_per_vote=get_users_per_vote($this->post_id);
             $is_institutional_weighted = $this->get_single_meta('_institution_weighted');
-            $is_council_master = $this->is_user_council_master();
+            $is_council_master = is_user_council_master();
 
             $this->render_partials('voting-counts.php',array('votes'=>$votes,
             'users_per_vote'=>$users_per_vote,
@@ -226,10 +222,6 @@ class Amsa_Voting_Page {
         return array_diff($amsa_rep_user_ids, $has_voted);
 
     }
-
-    public static function is_user_council_master(){
-		return current_user_can('edit_posts');
-	}
 
     private function get_user_vote(){
         $voted_users=$this->get_single_meta('_voted_users');

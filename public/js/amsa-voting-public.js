@@ -1,9 +1,14 @@
 jQuery(document).ready(function($) {
 	var spinner='<div class="loading-spinner" id="loading-spinnner"></div>';
 
-	function add_warning_message(message){
+	function add_poll_warning_message(message){
 		$('#amsa-voting-poll-warning-messasge-text').text(message)
 		$('#amsa-voting-poll-warning-messasges').show();
+	}
+
+	function add_speaker_list_warning_message(message){
+		$('#amsa-voting-speaker-list-warning-messasge-text').text(message)
+		$('#amsa-voting-speaker-list-warning-messasges').show();
 	}
 
 	function scrollToElement(selector) {
@@ -52,13 +57,13 @@ jQuery(document).ready(function($) {
 			if (response.success){
                 // Display a thank you message after the form
 				wrapper.html(response.data['rendered_content']);
-				add_warning_message('Your vote is in!');
+				add_poll_warning_message('Your vote is in!');
 
 			} else{
-				add_warning_message(response.data);
+				add_poll_warning_message(response.data);
 			}
 		}).fail(function() {
-            add_warning_message('There was a problem with your vote. Please try again.');
+            add_poll_warning_message('There was a problem with your vote. Please try again.');
 		}).always(function(){
 			submitButton.prop('disabled', false);
 			scrollToElement('#amsa-voting-poll-warning-messasge-text');
@@ -85,24 +90,20 @@ jQuery(document).ready(function($) {
 			console.log(response.success);
 			if (response.success){
 				wrapper.html(response.data['rendered_content']);
-				add_warning_message("Votes are now "+response.data['poll_status']);
+				add_poll_warning_message("Votes are now "+response.data['poll_status']);
 				// location.reload(true);
 			} else{
 				console.log(response);
-				add_warning_message("There was a problem with opening the poll");
+				add_poll_warning_message("There was a problem with opening the poll");
 			}
 		}).fail(function() {
-            add_warning_message('There was a problem with opening the poll. Please try again.');
+            add_poll_warning_message('There was a problem with opening the poll. Please try again.');
 		}).always(function(){
 			submitButton.prop('disabled', false);
 			wrapper.find('.loading-spinner').remove();
-			scrollToElement('#amsa-voting-poll-warning-messasge-text');
+			scrollToElement('.poll-status-display');
 		});
 	});
-
-	var timeout; // Variable to store the timeout
-
-	// Function to run when #myInput changes
 
 	
 	$("#amsa-voting-proxy-nomination-list-wrapper").on("keyup", '#amsa-voting-search-proxy', function() {
@@ -156,10 +157,10 @@ jQuery(document).ready(function($) {
 				wrapper.hide();
 				$('#amsa-voting-dynamic-content-wrapper').html(response.data['voting_form']);
 			scrollToElement('#amsa-voting-poll-warning-messasge-text');
-			add_warning_message('User nominated as proxy successfully.');
+			add_poll_warning_message('User nominated as proxy successfully.');
                 // You can add further actions here after successful nomination
             } else {
-                add_warning_message("There was a problem nominating a proxy");
+                add_poll_warning_message("There was a problem nominating a proxy");
 				console.log(response);
             }
 		}).always(function(){
@@ -187,10 +188,10 @@ jQuery(document).ready(function($) {
             if (response.success) {
 				wrapper.html(response.data['rendered_content']);
 				$('#amsa-voting-dynamic-content-wrapper').html(response.data['voting_form']);
-                add_warning_message("You've retracted your proxy");
+                add_poll_warning_message("You've retracted your proxy");
                 // You can add further actions here after successful nomination
             } else {
-                add_warning_message('Failed to retract proxy.');
+                add_poll_warning_message('Failed to retract proxy.');
 				console.log(response);
             }
 		}).always(function(){
@@ -232,7 +233,7 @@ jQuery(document).ready(function($) {
 					wrapper.html(response.data['rendered_content']);
 					// You can add further actions here after successful nomination
 				} else {
-					add_warning_message('Failed to display proxies.');
+					add_poll_warning_message('Failed to display proxies.');
 					console.log(response.data);
 				}
 			}).always(function(){
@@ -244,8 +245,194 @@ jQuery(document).ready(function($) {
 		}
     });
 
+	$('#amsa-voting-speaker-list-wrapper').on('submit', '#nominate-speaker-form', function(e) {
+		e.preventDefault();
+		var data = $(this).serialize();
+		data += '&nonce=' + Theme_Variables.nonce;
+		data = data + '&nonce=' + Theme_Variables.nonce;
+		
+		$.post(Theme_Variables.ajax_url, data, function(response) {
+			if (response.success){
+				add_speaker_list_warning_message(response.data['message']);
+				$('#amsa-voting-speaker-list-wrapper').html(response.data['rendered_content']);
+			}else{
+				alert(response.data);
+				console.log(response);
+			}
 
+		});
+	});
 
+	$('#amsa-voting-speaker-list-wrapper').on('click', '.speaker-removal-button', function(e) {
+		var submitButton = $(this);
+		var data = {
+			nonce: Theme_Variables.nonce,
+			action: 'retract_nomination',
+			post_id: submitButton.data('post-id'),
+			speaker_user_id: submitButton.data('speaker-user-id') // Adjust index for 0-based array
+		};
+	
+		// AJAX setup to handle the removal
+		$.post(Theme_Variables.ajax_url, data, function(response){
+			if (response.success){
+				add_speaker_list_warning_message(response.data['message']);
+				$('#amsa-voting-speaker-list-wrapper').html(response.data['rendered_content']);
+			}else{
+				alert(response.data);
+				console.log(response);
+			}
+		
 
+		});
+	});
+
+	$('#real-time-update').change(function () {
+		if ($(this).is(":checked")) {
+			$('<span id="real-time-udpate-warning-message">Warning: Real-time updates may incur high server loads.</span>').insertAfter($(this));
+			setInterval(function () {
+				$.ajax({
+					url: Theme_Variables.ajax_url,
+					type: 'POST',
+					data: {
+						action: 'real_time_speaker_list',
+						post_id: $('#amsa-voting-speaker-list-post-id').val(),
+						nonce: Theme_Variables.nonce
+					},
+					success: function (response) {
+						$('#amsa-voting-speaker-list-wrapper').html(response.data['rendered_content']);
+						console.log('refreshed');
+
+					},
+					error: function (response){
+						console.log(response);
+					}
+				});
+			}, 20000); // 20 seconds
+		} else {
+			// Clear interval if unchecked
+			clearInterval();
+			$('#real-time-udpate-warning-message').remove();
+		}
+	});
+
+	$('#amsa-voting-ballot-wrapper').on('submit', '#ballot_form', function(e) {
+		e.preventDefault();
+		var wrapper = $('#amsa-voting-ballot-wrapper');
+		wrapper.append(spinner);
+		// Create an object to store candidate preferences
+		var candidatePreferences = {};
+
+		// Loop through each select element in the form
+		$(this).find('select[name="candidate_preference[]"]').each(function() {
+			// Extract candidate name and preference value
+			var candidateName = $(this).attr('id').replace('candidate_', '');
+			var preferenceValue = $(this).val();
+	
+			// Store candidate preference in the object
+			candidatePreferences[candidateName] = preferenceValue;
+		});
+
+		var nonce = Theme_Variables.nonce;
+
+		$.ajax({
+			url: Theme_Variables.ajax_url,
+			type: 'POST',
+			data: {
+				action: 'cast_ballot',
+				nonce: nonce,
+				candidate_preference: candidatePreferences,
+				post_id: $('input[name="post_id"]').val()
+			},
+			success: function(response) {
+				if (response.success) {
+					add_poll_warning_message("Your vote is in!");
+					
+				} else {
+					alert(response.data);
+				}
+			},
+			error: function(xhr, status, error) {
+				console.error(xhr.responseText);
+			}
+		}).always(function(){
+			wrapper.find('.loading-spinner').remove();
+			scrollToElement('.poll-status-display');
+		});
+	});
+
+	var optionsTemplate = {};
+	function getOptionsTemplate(){
+		$('.candidate-select').each(function() {
+			var $select = $(this);
+			var id = $select.attr('id');
+			optionsTemplate[id] = $select.html();
+		});
+	}
+
+	var click_counter = 0;
+	$('#amsa-voting-ballot-wrapper').on('click', '.candidate-select', function() {
+		if(click_counter<=0){
+			getOptionsTemplate();
+		}
+		click_counter = click_counter+1;
+	});
+
+	$('#amsa-voting-ballot-wrapper').on('change', '.candidate-select', function() {
+		updateOptions();
+	});
+
+	function updateOptions() {
+		var selectedValues = $('.candidate-select').map(function() {
+			return $(this).val();
+		}).get();
+
+		$('.candidate-select').each(function() {
+			var $select = $(this);
+			var currentValue = $select.val();
+			$select.html(optionsTemplate[$select.attr('id')]); // Reset options
+			$select.val(currentValue); // Restore selected value
+
+			$select.find('option').each(function() {
+				var $option = $(this);
+				if ($option.val() !== "" && $option.val() !== currentValue && selectedValues.includes($option.val())) {
+					$option.remove();
+				}
+			});
+		});
+	}
+
+	$('#amsa-voting-ballot-wrapper').on('click','#ballot_status_change', function(event) {
+		var postID = $('#admin-toggle-ballot-status').data('post_id');
+		var wrapper = $('#amsa-voting-ballot-wrapper');
+		var submitButton = $('#ballot_status_change');
+
+		submitButton.prop('disabled', true);
+		wrapper.append(spinner);
+
+		var data= {
+			'action': 'handle_ballot_status_change',
+			'post_id': postID,
+			'poll_status_change':1,
+			'nonce': Theme_Variables.nonce
+		};
+		
+		$.post(Theme_Variables.ajax_url, data, function(response){
+			console.log(response.success);
+			if (response.success){
+				wrapper.html(response.data['rendered_content']);
+				add_poll_warning_message("Ballot is now "+response.data['poll_status']);
+				// location.reload(true);
+			} else{
+				console.log(response);
+				add_poll_warning_message("There was a problem with opening the ballot");
+			}
+		}).fail(function() {
+            add_poll_warning_message('There was a problem with opening the ballot. Please try again.');
+		}).always(function(){
+			submitButton.prop('disabled', false);
+			wrapper.find('.loading-spinner').remove();
+			scrollToElement('.poll-status-display');
+		});
+	});
 
 });

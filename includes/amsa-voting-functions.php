@@ -256,6 +256,10 @@ function is_user_representing_amsa_rep($user_id){
     return $is_user_proxying_for_rep;
 }
 
+function is_user_council_master(){
+    return current_user_can('is_council_master') || current_user_can('manage_options') || current_user_can('edit_posts');
+}
+
 function prettify_role_names($roles){
     $display_role = implode(', ', $roles);
     $display_role = str_replace('subscriber', 'AMSA Member', $display_role);
