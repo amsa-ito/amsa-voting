@@ -1,0 +1,17 @@
+{
+    "apiVersion": 2,
+    "title": "Speaker List",
+    "name": "amsa/speaker-list",
+    "category": "common",
+    "icon": "admin-generic",
+    "version": "431",
+    "attributes": {
+        "blockID": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "editorScript": "file:./block.js",
+    "style": "file:./style.css"
+
+}
