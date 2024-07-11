@@ -49,6 +49,8 @@ class Amsa_Voting_Poll_Topic{
 		add_action('admin_action_duplicate_'.$this->post_name, [$this, 'duplicate_post_handler']);
         add_action( 'add_meta_boxes', array($this,'voting_options_meta_box') );
 		add_action( 'save_post_'.$this->post_name, array($this, 'save_voting_options_meta_box_data') );
+		add_action('manage_posts_extra_tablenav', [$this, 'add_export_button']);
+		add_action('admin_init', [$this, 'export_poll_topics_to_csv']);
 
 		add_shortcode(str_replace('-','_',$plugin_name.'_'.$post_name), array($this, 'voting_page_shortcode'));
         add_shortcode('poll_topics_overview_table', array($this,'poll_topics_overview_shortcode'));
@@ -123,6 +125,58 @@ class Amsa_Voting_Poll_Topic{
 			'default' => array(),
 		));
 
+	}
+
+	public function add_export_button($which){
+		if ($which === 'top' && get_post_type() === 'poll_topic') {
+			echo '<input type="submit" name="export_poll_topics" class="button button-primary" value="Export to CSV" style="margin-left:10px;">';
+		}
+	}
+
+	function export_poll_topics_to_csv() {
+		if (!is_user_council_master() || !isset($_GET['export_poll_topics']) || !isset($_GET['post']) ) {
+			return;
+		}
+	
+		$filename = 'poll_topics_' . date('Y-m-d') . '.csv';
+		header('Content-Description: File Transfer');
+		header('Content-Disposition: attachment; filename=' . $filename);
+		header('Content-Type: text/csv; charset=' . get_option('blog_charset'), true);
+	
+		$output = fopen('php://output', 'w');
+
+	
+		// Get all Poll Topics
+		$args = array(
+			'post_type' => $this->post_name,
+			'posts_per_page' => -1,
+			'include' => $_GET['post']
+		);
+		$posts = get_posts($args);
+	
+		// Output CSV column headings
+		$headers = array('ID', 'Title', 'Content');
+		$first_post = reset($posts);
+		$meta_keys = array_keys(get_post_meta($first_post->ID));
+		$headers = array_merge($headers, $meta_keys);
+		fputcsv($output, $headers);
+	
+		// Output CSV rows
+		foreach ($posts as $post) {
+			$data = array(
+				$post->ID,
+				$post->post_title,
+				$post->post_content,
+			);
+			$meta_data = get_post_meta($post->ID);
+			foreach ($meta_keys as $key) {
+				$data[] = isset($meta_data[$key]) ? maybe_serialize($meta_data[$key][0]) : '';
+			}
+			fputcsv($output, $data);
+		}
+	
+		fclose($output);
+		exit;
 	}
 
     public function voting_options_meta_box() {
